@@ -1,0 +1,27 @@
+on: [push, pull_request]
+name: Check
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: [1.27.1]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: Install Linux GUI Dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test
+      run: make test
